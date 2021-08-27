@@ -7,7 +7,6 @@
 
 # load libraries
 import argparse  
-import tensorflow as tf
 import torch
 from torch import nn
 from torch import optim
@@ -29,16 +28,17 @@ from earth import save_checkpoint, load_checkpoint
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Training")
-    parser.add_argument('--data_dir', action='store', help='data root')
+    parser.add_argument('data_dir', action='store', default='flowers') # change from '--data_dir'
     parser.add_argument('--arch', dest='arch', default='densenet121', choices=['vgg13', 'densenet121'], help='CNN architecture')
     parser.add_argument('--learning_rate', dest='learning_rate', default='0.001', help='learning rate')
     parser.add_argument('--hidden_units', dest='hidden_units', default='512', help='hidden units')
     parser.add_argument('--epochs', dest='epochs', default='3', help='num of epochs')
-    parser.add_argument('--gpu', action='store', default='gpu', help='use GPU for training')
+    parser.add_argument('--gpu', action='store_true', default='gpu', help='use GPU for training')
     parser.add_argument('--save_dir', dest="save_dir", action="store", default="checkpoint.pth", help='save the trained model to a checkpoint')
     return parser.parse_args()
 
 def train(model, criterion, optimizer, dataloaders, epochs, gpu):
+    print('training...')
     steps = 0
     print_every = 10
     for e in range(epochs):
@@ -47,7 +47,7 @@ def train(model, criterion, optimizer, dataloaders, epochs, gpu):
             steps += 1 
             #if torch.cuda.is_available(): # testing this out, uncomment later
                # model.cuda()
-            if gpu == 'gpu':
+            if gpu == 'gpu': # Optional to put in Main: device = torch.device('cuda' if torch.cuda.is_available() and in_args.gpu else 'cpu')
                 model.cuda()
                 inputs, labels = inputs.to('cuda'), labels.to('cuda') # use cuda
             else:
@@ -99,7 +99,7 @@ def main():
     args = parse_args()
 # Dictionary holding location of training and validation data
 
-    data_dir = 'flowers'
+    data_dir = args.data_dir
     train_dir = data_dir + '/train'
     val_dir = data_dir + '/valid'
     test_dir = data_dir + '/test'
